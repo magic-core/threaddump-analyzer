@@ -132,30 +132,6 @@ function ThreadStatus(thread) {
             html += "waiting to acquire [";
             html += toSynchronizerHref(this.thread.wantToAcquire);
             html += "]";
-        } else if (this.thread.threadState === "TIMED_WAITING (sleeping)") {
-            html += "timed_waiting";
-        } else if (this.thread.threadState === "TIMED_WAITING (parking)") {
-            html += "timed_waiting";
-        } else if (this.thread.threadState === "NEW") {
-            html += "not started";
-        } else if (this.thread.threadState === "TERMINATED") {
-            html += "terminated";
-        } else if (this.thread.threadState === null) {
-            html += "non-Java thread";
-        } else if (this.thread.frames.length === 0 ) {
-            html += "non-Java thread";
-        } else if (this.thread.threadState === "RUNNABLE") {
-            html += "running";
-        } else if (this.thread.threadState === "BLOCKED") {
-            html += "blocked|waiting";
-        }else if (this.thread.threadState === "WAITING (parking)") {
-            html += "blocked|waiting";
-        } else {
-            // FIXME: Write something in the warnings section (that
-            // doesn't exist yet)
-            html += '<span class="warn" title="Thread is &quot;';
-            html += this.thread.threadState;
-            html += '&quot; without waiting for anything">inconsistent<sup>?</sup></span>';
         }
 
         if (this.thread.locksHeld.length > 0) {
@@ -788,15 +764,16 @@ function Analyzer(text) {
             var currentThreadsAndStack = threadsAndStacks[i];
             var threads = currentThreadsAndStack.threads;
 
+            var statusHtml = "threads[0].threadState";
+            if (statusHtml === null) {
+                statusHtml += "non-Java threadState";
+            } else if (statusHtml.length === 0 ) {
+                statusHtml += "non-Java threadState";
+            } 
+            
             asHtml += '<div class="threadgroup">\n';
             var noOrThis = (currentThreadsAndStack.stackFrames.length === 0) ? "no" : "this";
-//             if (threads.length > 4) {
-                asHtml += '<div class="threadcount">（ThreadState:' + threads[0].threadState + "）" + threads.length + " threads with " + noOrThis + " stack:</div>\n";
-//             } else {
-//                 // Having an empty div here makes all paragraphs, both
-//                 // those with and those without headings evenly spaced.
-//                 asHtml += '<div class="threadcount"></div>\n';
-//             }
+            asHtml += '<div class="threadcount">（ThreadState:' + statusHtml + "）" + threads.length + " threads with " + noOrThis + " stack:</div>\n";
 
             for (var j = 0; j < threads.length; j++) {
                 var thread = threads[j];
