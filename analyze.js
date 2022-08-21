@@ -132,8 +132,8 @@ function ThreadStatus(thread) {
             html += "waiting to acquire [";
             html += toSynchronizerHref(this.thread.wantToAcquire);
             html += "]";
-        } else if (this.thread.threadState === "TIMED_WAITING (sleeping)"||this.thread.threadState === "TIMED_WAITING (parking)"||) {
-            html += "sleeping";
+        } else if (this.thread.threadState === "TIMED_WAITING (sleeping)"||this.thread.threadState === "TIMED_WAITING (parking)") {
+            html += "timed_waiting";
         } else if (this.thread.threadState === "NEW") {
             html += "not started";
         } else if (this.thread.threadState === "TERMINATED") {
