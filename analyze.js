@@ -135,7 +135,7 @@ function ThreadStatus(thread) {
         }
 
         if (this.thread.locksHeld.length > 0) {
-            html += ", holding [";
+            html += " holding [";
             for (var i = 0; i < this.thread.locksHeld.length; i++) {
                 if (i > 0) {
                     html += ", ";
