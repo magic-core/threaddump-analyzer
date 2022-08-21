@@ -132,7 +132,7 @@ function ThreadStatus(thread) {
             html += "waiting to acquire [";
             html += toSynchronizerHref(this.thread.wantToAcquire);
             html += "]";
-        } else if (this.thread.threadState === "TIMED_WAITING (sleeping)") {
+        } else if (this.thread.threadState === "TIMED_WAITING (sleeping)"||this.thread.threadState === "TIMED_WAITING (parking)"||) {
             html += "sleeping";
         } else if (this.thread.threadState === "NEW") {
             html += "not started";
@@ -144,6 +144,8 @@ function ThreadStatus(thread) {
             html += "non-Java thread";
         } else if (this.thread.threadState === "RUNNABLE") {
             html += "running";
+        } else if (this.thread.threadState === "BLOCKED"||this.thread.threadState === "WAITING (parking)") {
+            html += "blocked|waiting";
         } else {
             // FIXME: Write something in the warnings section (that
             // doesn't exist yet)
