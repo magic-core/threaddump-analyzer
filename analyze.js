@@ -144,7 +144,7 @@ function ThreadStatus(thread) {
                 html += toSynchronizerHref(this.thread.locksHeld[i]);
             }
             html += "]";
-        }
+        }        
 
         return html;
     };
