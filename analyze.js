@@ -764,7 +764,7 @@ function Analyzer(text) {
             var currentThreadsAndStack = threadsAndStacks[i];
             var threads = currentThreadsAndStack.threads;
 
-            var statusHtml = "threads[0].threadState";
+            var statusHtml = threads[0].threadState;
             if (statusHtml === null) {
                 statusHtml += "non-Java threadState";
             } else if (statusHtml.length === 0 ) {
