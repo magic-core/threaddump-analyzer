@@ -45,8 +45,9 @@ function analyze(text) {
     var ignores = analyzer.toIgnoresHtml();
     setHtml("IGNORED", ignores);
 
-    var running = analyzer.toRunningHtml();
-    setHtml("RUNNING", running);
+//     筛选运行状态的线程，按照最后执行到的堆栈代码行分组，每组展示所有最后执行的是该代码行的线程名称 
+//     var running = analyzer.toRunningHtml();
+//     setHtml("RUNNING", running);
 
     var synchronizers = analyzer.toSynchronizersHtml();
     setHtml("SYNCHRONIZERS", synchronizers);
@@ -811,23 +812,23 @@ function Analyzer(text) {
             "</a>",
         ].join("");
     };
-
-    this.toRunningHtml = function() {
-        var html = "";
-        var countedStrings = this.countedRunningMethods.getStrings();
-        for (var i = 0; i < countedStrings.length; i++) {
-            var countedString = countedStrings[i];
-            var ids = countedString.sources.map(this.getSourceInfo);
-            html += '<tr id="';
-            html += stringToId(countedString.string);
-            html += '"><td class="vertical-align">';
-            html += htmlEscape(countedString.string);
-            html += '</td><td class="raw">';
-            html += ids.join("<br>");
-            html += "</td></tr>\n";
-        }
-        return html;
-    };
+    
+//     this.toRunningHtml = function() {
+//         var html = "";
+//         var countedStrings = this.countedRunningMethods.getStrings();
+//         for (var i = 0; i < countedStrings.length; i++) {
+//             var countedString = countedStrings[i];
+//             var ids = countedString.sources.map(this.getSourceInfo);
+//             html += '<tr id="';
+//             html += stringToId(countedString.string);
+//             html += '"><td class="vertical-align">';
+//             html += htmlEscape(countedString.string);
+//             html += '</td><td class="raw">';
+//             html += ids.join("<br>");
+//             html += "</td></tr>\n";
+//         }
+//         return html;
+//     };
 
     this._countRunningMethods = function() {
         var countedRunning = new StringCounter();
