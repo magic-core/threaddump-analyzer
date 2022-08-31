@@ -1,19 +1,3 @@
-/*
-Copyright 2014 Spotify AB
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 var EMPTY_STACK = "	<empty stack>";
 var generatedIdCounter = 1;
 
@@ -30,7 +14,7 @@ function analyzeFile() { // eslint-disable-line no-unused-vars
         var file = fileNode.files[0];
         var fileReader = new FileReader();
         fileReader.readAsText(file);
-        fileReader.onloadend = function(){
+        fileReader.onloadend = function () {
             var text = fileReader.result;
             analyze(text);
         };
@@ -52,10 +36,10 @@ function analyze(text) {
     var synchronizers = analyzer.toSynchronizersHtml();
     setHtml("SYNCHRONIZERS", synchronizers);
 
-    var runningHeader = document.getElementById("RUNNING_HEADER");
-    runningHeader.innerHTML = "Top Methods From " +
-        analyzer.countedRunningMethods.length +
-        " Running Threads";
+    // var runningHeader = document.getElementById("RUNNING_HEADER");
+    // runningHeader.innerHTML = "Top Methods From " +
+    //     analyzer.countedRunningMethods.length +
+    //     " Running Threads";
 }
 
 // This method is called from HTML so we need to tell ESLint it's not unused
@@ -102,7 +86,7 @@ function _extract(regex, string) {
 
 function decorateStackFrames(stackFrames) {
     if (stackFrames.length === 0) {
-        return [ EMPTY_STACK ];
+        return [EMPTY_STACK];
     }
 
     var decorated = [];
@@ -117,12 +101,12 @@ function toSynchronizerHref(id) {
 }
 
 function ThreadStatus(thread) {
-    this.isRunning = function() {
+    this.isRunning = function () {
         return this.thread.frames.length > 0 &&
             this.thread.threadState === "RUNNABLE";
     };
 
-    this.toHtml = function() {
+    this.toHtml = function () {
         var html = "";
 
         if (this.thread.wantNotificationOn !== null) {
@@ -145,7 +129,7 @@ function ThreadStatus(thread) {
                 html += toSynchronizerHref(this.thread.locksHeld[i]);
             }
             html += "]";
-        }        
+        }
 
         return html;
     };
@@ -160,16 +144,16 @@ function arrayAddUnique(array, toAdd) {
 }
 
 function Thread(line) {
-    this.toString = function() {
+    this.toString = function () {
         return '"' + this.name + '": ' + this.state + "\n" + this.toStackString();
     };
 
-    this.isValid = function() {
-        return Object.prototype.hasOwnProperty.call(this,"name") && this.name !== undefined;
+    this.isValid = function () {
+        return Object.prototype.hasOwnProperty.call(this, "name") && this.name !== undefined;
     };
 
     // Return true if the line was understood, false otherwise
-    this.addStackLine = function(line) {
+    this.addStackLine = function (line) {
         var match;
 
         var FRAME = /^\s+at (.*)/;
@@ -195,37 +179,37 @@ function Thread(line) {
             this.synchronizerClasses[id] = className;
 
             switch (state) {
-            case "eliminated":
-                // JVM internal optimization, not sure why it's in the
-                // thread dump at all
-                return true;
-
-            case "waiting on":
-                this.wantNotificationOn = id;
-                return true;
-
-            case "parking to wait for":
-                this.wantNotificationOn = id;
-                return true;
-
-            case "waiting to lock":
-                this.wantToAcquire = id;
-                return true;
-
-            case "locked":
-                if (this.wantNotificationOn === id) {
-                    // Lock is released while waiting for the notification
+                case "eliminated":
+                    // JVM internal optimization, not sure why it's in the
+                    // thread dump at all
                     return true;
-                }
-                // Threads can take the same lock in different frames,
-                // but we just want a mapping between threads and
-                // locks so we must not list any lock more than once.
-                arrayAddUnique(this.locksHeld, id);
-                arrayAddUnique(this.classicalLocksHeld, id);
-                return true;
 
-            default:
-                return false;
+                case "waiting on":
+                    this.wantNotificationOn = id;
+                    return true;
+
+                case "parking to wait for":
+                    this.wantNotificationOn = id;
+                    return true;
+
+                case "waiting to lock":
+                    this.wantToAcquire = id;
+                    return true;
+
+                case "locked":
+                    if (this.wantNotificationOn === id) {
+                        // Lock is released while waiting for the notification
+                        return true;
+                    }
+                    // Threads can take the same lock in different frames,
+                    // but we just want a mapping between threads and
+                    // locks so we must not list any lock more than once.
+                    arrayAddUnique(this.locksHeld, id);
+                    arrayAddUnique(this.classicalLocksHeld, id);
+                    return true;
+
+                default:
+                    return false;
             }
         }
 
@@ -259,11 +243,11 @@ function Thread(line) {
         return false;
     };
 
-    this.toStackString = function() {
+    this.toStackString = function () {
         return decorateStackFrames(this.frames).join("\n");
     };
 
-    this.toHeaderHtml = function() {
+    this.toHeaderHtml = function () {
         var headerHTML = '<span class="raw">';
         if (this.group !== undefined) {
             headerHTML += '"' + htmlEscape(this.group) + '"/';
@@ -280,15 +264,15 @@ function Thread(line) {
     };
 
     // Get the name of this thread wrapped in an <a href=>
-    this.getLinkedName = function() {
+    this.getLinkedName = function () {
         return '<a class="internal" href="#thread-' + this.tid + '">' + htmlEscape(this.name) + "</a>";
     };
 
-    this.getStatus = function() {
+    this.getStatus = function () {
         return new ThreadStatus(this);
     };
 
-    this.setWantNotificationOn = function(lockId) {
+    this.setWantNotificationOn = function (lockId) {
         this.wantNotificationOn = lockId;
 
         var lockIndex = this.locksHeld.indexOf(lockId);
@@ -315,8 +299,8 @@ function Thread(line) {
     this.tid = match.value;
     line = match.shorterString;
 
-    if(this.tid === undefined){
-        match = _extract(/ - Thread t@([0-9a-fx]+)/,line);
+    if (this.tid === undefined) {
+        match = _extract(/ - Thread t@([0-9a-fx]+)/, line);
         this.tid = match.value;
         line = match.shorterString;
     }
@@ -357,8 +341,8 @@ function Thread(line) {
         return undefined;
     }
     if (this.tid === undefined) {
-      this.tid = "generated-id-" + generatedIdCounter;
-      generatedIdCounter++;
+        this.tid = "generated-id-" + generatedIdCounter;
+        generatedIdCounter++;
     }
 
     this.frames = [];
@@ -373,7 +357,7 @@ function Thread(line) {
 }
 
 function StringCounter() {
-    this.addString = function(string, source) {
+    this.addString = function (string, source) {
         if (!Object.prototype.hasOwnProperty.call(this._stringsToCounts, string)) {
             this._stringsToCounts[string] = {count: 0, sources: []};
         }
@@ -382,13 +366,13 @@ function StringCounter() {
         this.length++;
     };
 
-    this.hasString = function(string) {
+    this.hasString = function (string) {
         return Object.prototype.hasOwnProperty.call(this._stringsToCounts, string);
     };
 
     // Returns all individual string and their counts as
     // {count:5, string:"foo", sources: [...]} hashes.
-    this.getStrings = function() {
+    this.getStrings = function () {
         var returnMe = [];
 
         for (var string in this._stringsToCounts) {
@@ -398,10 +382,10 @@ function StringCounter() {
 
             var count = this._stringsToCounts[string].count;
             var sources = this._stringsToCounts[string].sources;
-            returnMe.push({count:count, string:string, sources:sources});
+            returnMe.push({count: count, string: string, sources: sources});
         }
 
-        returnMe.sort(function(a, b) {
+        returnMe.sort(function (a, b) {
             if (a.count === b.count) {
                 return a.string < b.string ? -1 : 1;
             }
@@ -412,7 +396,7 @@ function StringCounter() {
         return returnMe;
     };
 
-    this.toString = function() {
+    this.toString = function () {
         var string = "";
         var countedStrings = this.getStrings();
         for (var i = 0; i < countedStrings.length; i++) {
@@ -425,7 +409,7 @@ function StringCounter() {
         return string;
     };
 
-    this.toHtml = function() {
+    this.toHtml = function () {
         var html = "";
         var countedStrings = this.getStrings();
         for (var i = 0; i < countedStrings.length; i++) {
@@ -466,7 +450,7 @@ function createLockUsersHtml(title, threads) {
 }
 
 function Synchronizer(id, className) {
-    this.getPrettyClassName = function() {
+    this.getPrettyClassName = function () {
         if (this._className === undefined) {
             return undefined;
         }
@@ -488,7 +472,7 @@ function Synchronizer(id, className) {
 
     /* How many threads are involved with this synchronizer? Used as a
      * sort key in the Synchronizers section. */
-    this.getThreadCount = function() {
+    this.getThreadCount = function () {
         var count = 0;
         if (this.lockHolder !== null) {
             count += 1;
@@ -498,7 +482,7 @@ function Synchronizer(id, className) {
         return count;
     };
 
-    this.toHtmlTableRow = function() {
+    this.toHtmlTableRow = function () {
         var html = "";
         html += '<tr id="synchronizer-' + this._id + '">';
 
@@ -553,7 +537,7 @@ function synchronizerComparator(a, b) {
 
 // Create an analyzer object
 function Analyzer(text) {
-    this._handleLine = function(line) {
+    this._handleLine = function (line) {
         var thread = new Thread(line);
         var parsed = false;
         if (thread.isValid()) {
@@ -576,13 +560,12 @@ function Analyzer(text) {
      * doesn't say on which object. This function guesses in the
      * simple case where those threads are holding only a single lock.
      */
-    this._identifyWaitedForSynchronizers = function() {
+    this._identifyWaitedForSynchronizers = function () {
         for (var i = 0; i < this.threads.length; i++) {
             var thread = this.threads[i];
 
             if (-1 === ["TIMED_WAITING (on object monitor)",
-                        "WAITING (on object monitor)"].indexOf(thread.threadState))
-            {
+                "WAITING (on object monitor)"].indexOf(thread.threadState)) {
                 // Not waiting for notification
                 continue;
             }
@@ -599,28 +582,28 @@ function Analyzer(text) {
         }
     };
 
-    this._isIncompleteThreadHeader = function(line) {
-      if (line.charAt(0) !== '"') {
-        // Thread headers start with ", this is not it
-        return false;
-      }
-      if (line.indexOf("prio=") !== -1) {
-        // Thread header contains "prio=" => we think it's complete
-        return false;
-      }
-      if (line.indexOf("Thread t@") !== -1) {
-        // Thread header contains a thread ID => we think it's complete
-        return false;
-      }
-      if (line.substr(line.length - 2, 2) === '":') {
-        // Thread headers ending in ": are complete as seen in the example here:
-        // https://github.com/spotify/threaddump-analyzer/issues/12
-        return false;
-      }
-      return true;
+    this._isIncompleteThreadHeader = function (line) {
+        if (line.charAt(0) !== '"') {
+            // Thread headers start with ", this is not it
+            return false;
+        }
+        if (line.indexOf("prio=") !== -1) {
+            // Thread header contains "prio=" => we think it's complete
+            return false;
+        }
+        if (line.indexOf("Thread t@") !== -1) {
+            // Thread header contains a thread ID => we think it's complete
+            return false;
+        }
+        if (line.substr(line.length - 2, 2) === '":') {
+            // Thread headers ending in ": are complete as seen in the example here:
+            // https://github.com/spotify/threaddump-analyzer/issues/12
+            return false;
+        }
+        return true;
     };
 
-    this._analyze = function(text) {
+    this._analyze = function (text) {
         var lines = text.split("\n");
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i];
@@ -644,7 +627,7 @@ function Analyzer(text) {
     // Returns an array [{threads:, stackFrames:,} ...]. The threads:
     // field contains an array of Threads. The stackFrames contain an
     // array of strings
-    this._toThreadsAndStacks = function() {
+    this._toThreadsAndStacks = function () {
         // Map stacks to which threads have them
         var stacksToThreads = {};
         for (var i = 0; i < this.threads.length; i++) {
@@ -665,7 +648,7 @@ function Analyzer(text) {
 
             stacks.push(stack);
         }
-        stacks.sort(function(a, b) {
+        stacks.sort(function (a, b) {
             if (a === b) {
                 return 0;
             }
@@ -702,7 +685,7 @@ function Analyzer(text) {
             var currentStack = stacks[j];
             var threads = stacksToThreads[currentStack];
 
-            threads.sort(function(a, b){
+            threads.sort(function (a, b) {
                 if (a.name > b.name) {
                     return 1;
                 }
@@ -721,7 +704,7 @@ function Analyzer(text) {
         return threadsAndStacks;
     };
 
-    this._stackToHtml = function(stackFrames) {
+    this._stackToHtml = function (stackFrames) {
         if (stackFrames.length === 0) {
             return '<div class="raw">' + htmlEscape(EMPTY_STACK) + "</div>\n";
         }
@@ -752,7 +735,7 @@ function Analyzer(text) {
         return asHtml;
     };
 
-    this.toHtml = function() {
+    this.toHtml = function () {
         if (this.threads.length === 0) {
             return "";
         }
@@ -768,10 +751,10 @@ function Analyzer(text) {
             var statusHtml = threads[0].threadState;
             if (statusHtml === null) {
                 statusHtml += "non-Java threadState";
-            } else if (statusHtml.length === 0 ) {
+            } else if (statusHtml.length === 0) {
                 statusHtml += "non-Java threadState";
-            } 
-            
+            }
+
             asHtml += '<div class="threadgroup">\n';
             var noOrThis = (currentThreadsAndStack.stackFrames.length === 0) ? "no" : "this";
             asHtml += '<div class="threadcount">（ThreadState:' + statusHtml + "）" + threads.length + " threads with " + noOrThis + " stack:</div>\n";
@@ -793,44 +776,44 @@ function Analyzer(text) {
         return asHtml;
     };
 
-    this.toIgnoresString = function() {
-        return this._ignores.toString() + "\n";
-    };
+    // this.toIgnoresString = function () {
+    //     return this._ignores.toString() + "\n";
+    // };
 
-    this.toIgnoresHtml = function() {
+    this.toIgnoresHtml = function () {
         return this._ignores.toHtml();
     };
 
-    this.toRunningString = function() {
-        return this.countedRunningMethods.toString();
-    };
+    // this.toRunningString = function() {
+    //     return this.countedRunningMethods.toString();
+    // };
+    //
+    // this.getSourceInfo = function(source){
+    //     return [
+    //         '<a class="internal" href="#thread-' + source.tid + '">',
+    //         htmlEscape(source.name),
+    //         "</a>",
+    //     ].join("");
+    // };
 
-    this.getSourceInfo = function(source){
-        return [
-            '<a class="internal" href="#thread-' + source.tid + '">',
-            htmlEscape(source.name),
-            "</a>",
-        ].join("");
-    };
-    
-//     this.toRunningHtml = function() {
-//         var html = "";
-//         var countedStrings = this.countedRunningMethods.getStrings();
-//         for (var i = 0; i < countedStrings.length; i++) {
-//             var countedString = countedStrings[i];
-//             var ids = countedString.sources.map(this.getSourceInfo);
-//             html += '<tr id="';
-//             html += stringToId(countedString.string);
-//             html += '"><td class="vertical-align">';
-//             html += htmlEscape(countedString.string);
-//             html += '</td><td class="raw">';
-//             html += ids.join("<br>");
-//             html += "</td></tr>\n";
-//         }
-//         return html;
-//     };
+    // this.toRunningHtml = function() {
+    //     var html = "";
+    //     var countedStrings = this.countedRunningMethods.getStrings();
+    //     for (var i = 0; i < countedStrings.length; i++) {
+    //         var countedString = countedStrings[i];
+    //         var ids = countedString.sources.map(this.getSourceInfo);
+    //         html += '<tr id="';
+    //         html += stringToId(countedString.string);
+    //         html += '"><td class="vertical-align">';
+    //         html += htmlEscape(countedString.string);
+    //         html += '</td><td class="raw">';
+    //         html += ids.join("<br>");
+    //         html += "</td></tr>\n";
+    //     }
+    //     return html;
+    // };
 
-    this._countRunningMethods = function() {
+    this._countRunningMethods = function () {
         var countedRunning = new StringCounter();
         for (var i = 0; i < this.threads.length; i++) {
             var thread = this.threads[i];
@@ -849,7 +832,7 @@ function Analyzer(text) {
         return countedRunning;
     };
 
-    this.toSynchronizersHtml = function() {
+    this.toSynchronizersHtml = function () {
         var html = "";
         for (var i = 0; i < this._synchronizers.length; i++) {
             var synchronizer = this._synchronizers[i];
@@ -858,7 +841,7 @@ function Analyzer(text) {
         return html;
     };
 
-    this._registerSynchronizer = function(registry, id, synchronizerClasses) {
+    this._registerSynchronizer = function (registry, id, synchronizerClasses) {
         if (id === null) {
             return;
         }
@@ -871,7 +854,7 @@ function Analyzer(text) {
     // objects. Note that the Synchronizer objects won't get any cross
     // references from this method; they are don by
     // _enumerateSynchronizers() below.
-    this._createSynchronizerById = function() {
+    this._createSynchronizerById = function () {
         var returnMe = {};
 
         for (var i = 0; i < this.threads.length; i++) {
@@ -894,7 +877,7 @@ function Analyzer(text) {
 
     // Create a properly cross-referenced array with all synchronizers
     // in the thread dump
-    this._enumerateSynchronizers = function() {
+    this._enumerateSynchronizers = function () {
         for (var i = 0; i < this.threads.length; i++) {
             var thread = this.threads[i];
             var synchronizer;
